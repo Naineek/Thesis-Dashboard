@@ -168,8 +168,19 @@ fig_heat = px.imshow(heatmap_df, aspect='auto', color_continuous_scale='Viridis'
 st.plotly_chart(fig_heat, use_container_width=True)
 
 # ========== INTERACTIVE MAP ==========
+st.markdown("""
+    <style>
+    .map-container {
+        padding-bottom: 0px;
+        margin-bottom: 0px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 with st.container():
     st.markdown("### 🗺️ Interactive Traffic Map (Newtown)", help="Zoom or click markers for congestion details")
+    
+    # Create map
     m = folium.Map(location=[22.5818, 88.4819], zoom_start=14)
     
     congestion_data = [
@@ -188,8 +199,8 @@ with st.container():
             fill_opacity=0.6
         ).add_to(m)
     
-    # Fix the height here if needed
-    st_folium(m, width=700, height=400)
+    # Render the map with fixed height
+    st_folium(m, width=700, height=400, returned_objects=[])
 
 # ========== WEATHER CONDITIONS ==========
 st.markdown("---")
