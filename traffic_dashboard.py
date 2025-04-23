@@ -1,6 +1,9 @@
 import pytz
 from datetime import datetime
 
+ist = pytz.timezone('Asia/Kolkata')
+now = datetime.now(ist)
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -18,8 +21,6 @@ with st.sidebar:
     import streamlit_autorefresh
     streamlit_autorefresh.st_autorefresh(interval=1000, key="clock_refresh")
     st.markdown("### ⏰ Current Time (IST)")
-    ist = pytz.timezone('Asia/Kolkata')
-    now = datetime.now(ist)
     st.write("Current Time (IST):", now.strftime("%d-%m-%Y %H:%M:%S"))
 
 
