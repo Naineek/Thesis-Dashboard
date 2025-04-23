@@ -40,7 +40,7 @@ with st.sidebar:
     day_type = st.radio("Select Traffic Day Type", ['Normal Day', 'Holiday/Festival', 'Special Event'])
     
     st.markdown("### 🟢 System Status")
-    st.write(f"Last Updated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    st.write(f"Last Updated: {now.strftime('%Y-%m-%d %H:%M:%S')} (IST)")
     st.write("Predictions refresh every 5 minutes.")
 
     st.markdown("## Emergency Alert")
