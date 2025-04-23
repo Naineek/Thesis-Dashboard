@@ -8,3 +8,4 @@ folium
 openpyxl
 streamlit-folium
 streamlit-autorefresh
+pytz
