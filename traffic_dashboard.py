@@ -172,28 +172,33 @@ import streamlit as st
 from streamlit_folium import st_folium
 import folium
 
-# Remove default padding using custom CSS
+# ======= Remove padding/margin globally =======
 st.markdown("""
     <style>
-    .block-container {
-        padding-bottom: 0rem;
-    }
-    iframe {
-        display: block;
-        margin: 0 auto;
-        padding: 0;
-    }
-    .folium-map {
-        margin-bottom: -40px !important;
-    }
+        .main {
+            padding-bottom: 0rem !important;
+        }
+        .block-container {
+            padding-bottom: 0rem !important;
+        }
+        iframe {
+            height: 400px !important;
+            display: block;
+            margin: 0 auto;
+        }
+        .folium-map {
+            margin-bottom: -60px !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
+# ========== INTERACTIVE MAP ==========
 st.markdown("### 🗺️ Interactive Traffic Map (Newtown)", help="Zoom or click markers for congestion details")
 
-# Create folium map
+# Create map
 m = folium.Map(location=[22.5818, 88.4819], zoom_start=14)
 
+# Add markers
 congestion_data = [
     (22.5818, 88.4819, "Heavy", "#FF0000"),
     (22.5850, 88.4880, "Medium", "#FFA500"),
@@ -210,8 +215,8 @@ for lat, lon, severity, color in congestion_data:
         fill_opacity=0.6
     ).add_to(m)
 
-# Render folium map with fixed height and tight margin
-st_folium(m, width=700, height=400)
+# Force height render with st_folium
+st_folium(m, width=700, height=400, returned_objects=[])
 
 # ========== WEATHER CONDITIONS ==========
 st.markdown("---")
