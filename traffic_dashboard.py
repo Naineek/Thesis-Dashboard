@@ -167,20 +167,28 @@ heatmap_df = traffic_df.set_index('Time').iloc[:, :-2].T
 fig_heat = px.imshow(heatmap_df, aspect='auto', color_continuous_scale='Viridis')
 st.plotly_chart(fig_heat, use_container_width=True)
 
-# ========== INTERACTIVE MAP ==========
 import streamlit as st
 from streamlit_folium import st_folium
 import folium
 
-# ======= Remove padding/margin globally =======
+# ======= Remove padding/margin globally (including sidebar) =======
 st.markdown("""
     <style>
+        /* Main body styling */
         .main {
             padding-bottom: 0rem !important;
         }
         .block-container {
             padding-bottom: 0rem !important;
         }
+
+        /* Sidebar adjustments */
+        .css-1d391kg {
+            padding-top: 0rem !important;
+            margin-top: 0rem !important;
+        }
+
+        /* Iframe fixes for folium */
         iframe {
             height: 400px !important;
             display: block;
