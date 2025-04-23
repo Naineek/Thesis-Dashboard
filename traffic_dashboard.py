@@ -1,3 +1,5 @@
+import pytz
+from datetime import datetime
 
 import streamlit as st
 import pandas as pd
@@ -15,8 +17,11 @@ st.set_page_config(page_title="Urban Traffic Prediction & Monitoring Dashboard",
 with st.sidebar:
     import streamlit_autorefresh
     streamlit_autorefresh.st_autorefresh(interval=1000, key="clock_refresh")
-    st.markdown("### ⏰ Current Time")
-    st.write(datetime.datetime.now().strftime("%A, %d %B %Y\n%I:%M:%S %p"))
+    st.markdown("### ⏰ Current Time (IST)")
+    ist = pytz.timezone('Asia/Kolkata')
+    now = datetime.now(ist)
+    st.write("Current Time (IST):", now.strftime("%d-%m-%Y %H:%M:%S"))
+
 
     st.title("Control Panel")
     st.markdown("### 📍 Location & Direction")
