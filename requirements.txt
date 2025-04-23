@@ -7,3 +7,4 @@ plotly
 folium
 openpyxl
 streamlit-folium
+streamlit-autorefresh
