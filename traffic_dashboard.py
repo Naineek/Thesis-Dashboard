@@ -189,7 +189,7 @@ with st.container():
         ).add_to(m)
     
     # Fix the height here if needed
-    st_folium(m, width=700, height=250)
+    st_folium(m, width=700, height=400)
 
 # ========== WEATHER CONDITIONS ==========
 st.markdown("---")
