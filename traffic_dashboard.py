@@ -1,8 +1,12 @@
 import pytz
 from datetime import datetime
 
-ist = pytz.timezone('Asia/Kolkata')
-now = datetime.now(ist)
+# Global IST timezone
+IST = pytz.timezone("Asia/Kolkata")
+
+# Global function for current IST time
+def now_ist():
+    return datetime.now(IST)
 
 import streamlit as st
 import pandas as pd
@@ -21,7 +25,7 @@ with st.sidebar:
     import streamlit_autorefresh
     streamlit_autorefresh.st_autorefresh(interval=1000, key="clock_refresh")
     st.markdown("### ⏰ Current Time (IST)")
-    st.write("Current Time (IST):", now.strftime("%d-%m-%Y %H:%M:%S"))
+    st.write("Current Time (IST):", now_ist().strftime("%d-%m-%Y %H:%M:%S"))
 
 
     st.title("Control Panel")
@@ -40,7 +44,7 @@ with st.sidebar:
     day_type = st.radio("Select Traffic Day Type", ['Normal Day', 'Holiday/Festival', 'Special Event'])
     
     st.markdown("### 🟢 System Status")
-    st.write(f"Last Updated: {now.strftime('%Y-%m-%d %H:%M:%S')} (IST)")
+    st.write(f"Last Updated: {now_ist().strftime('%Y-%m-%d %H:%M:%S')} (IST)")
     st.write("Predictions refresh every 5 minutes.")
 
     st.markdown("## Emergency Alert")
@@ -66,7 +70,7 @@ st.markdown("""
 # ========== SIMULATED DATA ==========
 def simulate_traffic_data(day_type):
     vehicle_types = ['Car', '2 Wheeler', 'Bus', 'Truck', 'Bicycle', 'Pedestrian', 'Auto', 'Others']
-    timestamp = pd.date_range(end=pd.Timestamp.now(), periods=24 * 6, freq='5min')
+    timestamp = pd.date_range(end=now_ist(), periods=24 * 6, freq='5min')
     multiplier = {"Normal Day": 1, "Holiday/Festival": 0.6, "Special Event": 1.4}[day_type]
     data = {'Time': timestamp}
     for vt in vehicle_types:
@@ -97,7 +101,7 @@ else:
 def generate_forecast_intervals(start_time, intervals):
     return [(start_time + timedelta(minutes=i), start_time + timedelta(minutes=i + 5)) for i in intervals]
 
-now = datetime.datetime.now()
+now = now_ist()
 forecast_intervals = generate_forecast_intervals(now, [5, 15, 30, 60, 120])
 forecast_times = [f"{start.strftime('%I:%M %p')} - {end.strftime('%I:%M %p')}" for start, end in forecast_intervals]
 
