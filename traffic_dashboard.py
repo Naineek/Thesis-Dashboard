@@ -168,24 +168,28 @@ fig_heat = px.imshow(heatmap_df, aspect='auto', color_continuous_scale='Viridis'
 st.plotly_chart(fig_heat, use_container_width=True)
 
 # ========== INTERACTIVE MAP ==========
-st.markdown("---")
-st.markdown("### 🗺️ Interactive Traffic Map (Newtown)")
-m = folium.Map(location=[22.5818, 88.4819], zoom_start=14)
-congestion_data = [
-    (22.5818, 88.4819, "Heavy", "#FF0000"),
-    (22.5850, 88.4880, "Medium", "#FFA500"),
-    (22.5790, 88.4750, "Low", "#00FF00")
-]
-for lat, lon, severity, color in congestion_data:
-    folium.CircleMarker(
-        location=[lat, lon],
-        radius=20,
-        popup=f"{severity} Congestion",
-        color=color,
-        fill=True,
-        fill_opacity=0.6
-    ).add_to(m)
-st_folium(m, width=700, height=400)
+with st.container():
+    st.markdown("### 🗺️ Interactive Traffic Map (Newtown)", help="Zoom or click markers for congestion details")
+    m = folium.Map(location=[22.5818, 88.4819], zoom_start=14)
+    
+    congestion_data = [
+        (22.5818, 88.4819, "Heavy", "#FF0000"),
+        (22.5850, 88.4880, "Medium", "#FFA500"),
+        (22.5790, 88.4750, "Low", "#00FF00")
+    ]
+    
+    for lat, lon, severity, color in congestion_data:
+        folium.CircleMarker(
+            location=[lat, lon],
+            radius=20,
+            popup=f"{severity} Congestion",
+            color=color,
+            fill=True,
+            fill_opacity=0.6
+        ).add_to(m)
+    
+    # Fix the height here if needed
+    st_folium(m, width=700, height=400)
 
 # ========== WEATHER CONDITIONS ==========
 st.markdown("---")
