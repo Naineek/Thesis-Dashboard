@@ -168,39 +168,50 @@ fig_heat = px.imshow(heatmap_df, aspect='auto', color_continuous_scale='Viridis'
 st.plotly_chart(fig_heat, use_container_width=True)
 
 # ========== INTERACTIVE MAP ==========
+import streamlit as st
+from streamlit_folium import st_folium
+import folium
+
+# Remove default padding using custom CSS
 st.markdown("""
     <style>
-    .map-container {
-        padding-bottom: 0px;
-        margin-bottom: 0px;
+    .block-container {
+        padding-bottom: 0rem;
+    }
+    iframe {
+        display: block;
+        margin: 0 auto;
+        padding: 0;
+    }
+    .folium-map {
+        margin-bottom: -40px !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-with st.container():
-    st.markdown("### 🗺️ Interactive Traffic Map (Newtown)", help="Zoom or click markers for congestion details")
-    
-    # Create map
-    m = folium.Map(location=[22.5818, 88.4819], zoom_start=14)
-    
-    congestion_data = [
-        (22.5818, 88.4819, "Heavy", "#FF0000"),
-        (22.5850, 88.4880, "Medium", "#FFA500"),
-        (22.5790, 88.4750, "Low", "#00FF00")
-    ]
-    
-    for lat, lon, severity, color in congestion_data:
-        folium.CircleMarker(
-            location=[lat, lon],
-            radius=20,
-            popup=f"{severity} Congestion",
-            color=color,
-            fill=True,
-            fill_opacity=0.6
-        ).add_to(m)
-    
-    # Render the map with fixed height
-    st_folium(m, width=700, height=400, returned_objects=[])
+st.markdown("### 🗺️ Interactive Traffic Map (Newtown)", help="Zoom or click markers for congestion details")
+
+# Create folium map
+m = folium.Map(location=[22.5818, 88.4819], zoom_start=14)
+
+congestion_data = [
+    (22.5818, 88.4819, "Heavy", "#FF0000"),
+    (22.5850, 88.4880, "Medium", "#FFA500"),
+    (22.5790, 88.4750, "Low", "#00FF00")
+]
+
+for lat, lon, severity, color in congestion_data:
+    folium.CircleMarker(
+        location=[lat, lon],
+        radius=20,
+        popup=f"{severity} Congestion",
+        color=color,
+        fill=True,
+        fill_opacity=0.6
+    ).add_to(m)
+
+# Render folium map with fixed height and tight margin
+st_folium(m, width=700, height=400)
 
 # ========== WEATHER CONDITIONS ==========
 st.markdown("---")
