@@ -6,6 +6,14 @@ import plotly.express as px
 from streamlit_folium import st_folium
 import folium
 from datetime import timedelta
+import pytz
+IST = pytz.timezone('Asia/Kolkata')
+
+def ist_now():
+    return datetime.datetime.now(IST)
+
+def ist_timestamp():
+    return pd.Timestamp.now(tz=IST)
 
 # ========== PAGE CONFIGURATION ==========
 st.set_page_config(page_title="Urban Traffic Prediction & Monitoring Dashboard", layout="wide")
@@ -15,7 +23,7 @@ with st.sidebar:
     import streamlit_autorefresh
     streamlit_autorefresh.st_autorefresh(interval=1000, key="clock_refresh")
     st.markdown("### ⏰ Current Time")
-    st.write(datetime.datetime.now().strftime("%A, %d %B %Y\n%I:%M:%S %p"))
+    st.write(ist_now().strftime("%A, %d %B %Y\n%I:%M:%S %p"))
 
     st.title("Control Panel")
     st.markdown("### 📍 Location & Direction")
@@ -33,7 +41,7 @@ with st.sidebar:
     day_type = st.radio("Select Traffic Day Type", ['Normal Day', 'Holiday/Festival', 'Special Event'])
     
     st.markdown("### 🟢 System Status")
-    st.write(f"Last Updated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    st.write(f"Last Updated: {ist_now().strftime('%Y-%m-%d %H:%M:%S')}")
     st.write("Predictions refresh every 5 minutes.")
 
     st.markdown("## Emergency Alert")
@@ -59,7 +67,7 @@ st.markdown("""
 # ========== SIMULATED DATA ==========
 def simulate_traffic_data(day_type):
     vehicle_types = ['Car', '2 Wheeler', 'Bus', 'Truck', 'Bicycle', 'Pedestrian', 'Auto', 'Others']
-    timestamp = pd.date_range(end=pd.Timestamp.now(), periods=24 * 6, freq='5min')
+    timestamp = pd.date_range(end=ist_timestamp(), periods=24 * 6, freq='5min')
     multiplier = {"Normal Day": 1, "Holiday/Festival": 0.6, "Special Event": 1.4}[day_type]
     data = {'Time': timestamp}
     for vt in vehicle_types:
@@ -90,7 +98,7 @@ else:
 def generate_forecast_intervals(start_time, intervals):
     return [(start_time + timedelta(minutes=i), start_time + timedelta(minutes=i + 5)) for i in intervals]
 
-now = datetime.datetime.now()
+now = ist_now()
 forecast_intervals = generate_forecast_intervals(now, [5, 15, 30, 60, 120])
 forecast_times = [f"{start.strftime('%I:%M %p')} - {end.strftime('%I:%M %p')}" for start, end in forecast_intervals]
 
@@ -345,7 +353,7 @@ col6.metric("AQI", int(np.random.uniform(70, 150)))
 st.markdown("---")
 st.markdown("## 🚧 Incident & Alert Log")
 incident_data = {
-    "Time": [datetime.datetime.now().strftime("%Y-%m-%d %H:%M")],
+    "Time": [ist_now().strftime("%Y-%m-%d %H:%M")],
     "Type": ["Accident"],
     "Location": ["MAR, Newtown"],
     "Severity": ["High"]
