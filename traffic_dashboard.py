@@ -1,3 +1,4 @@
+%%writefile traffic_dashboard.py
 
 import streamlit as st
 import pandas as pd
@@ -99,23 +100,9 @@ forecast_times = [f"{start.strftime('%I:%M %p')} - {end.strftime('%I:%M %p')}" f
 if st.sidebar.button("🔄 Refresh Predictions"):
     st.experimental_rerun()
 
-df_modes = pd.DataFrame({
-    "Forecasted Time": forecast_times,
-    "Duration": ["5 min", "15 min", "30 min", "1 hour", "2 hour"],
-    "Car": np.random.randint(15, 60, 5),
-    "2 Wheeler": np.random.randint(13, 50, 5),
-    "Bus": np.random.randint(5, 20, 5),
-    "Truck": np.random.randint(1, 5, 5),
-    "Bicycle": np.random.randint(2, 13, 5),
-    "Pedestrian": np.random.randint(3, 15, 5),
-    "Auto": np.random.randint(5, 20, 5),
-    "Others": np.random.randint(2, 10, 5)
-})
-
-# PCU factors
+# PCU Calculation
 pcu_factors = {"Car": 1.0, "2 Wheeler": 0.5, "Bus": 2.5, "Truck": 3.0,
                "Bicycle": 0.4, "Pedestrian": 0.2, "Auto": 1.2, "Others": 3.5}
-df_modes["Total PCU"] = sum(df_modes[vt] * factor for vt, factor in pcu_factors.items()) * 12
 
 def get_los(pcu):
     if pcu <= 1440: return "A"
@@ -125,15 +112,115 @@ def get_los(pcu):
     elif pcu <= 7200: return "E"
     else: return "F"
 
+# ========= Create Forecast Rows =========
+forecast_counts = {
+    "Car": np.random.randint(15, 65, 5),
+    "2 Wheeler": np.random.randint(12, 50, 5),
+    "Bus": np.random.randint(5, 22, 5),
+    "Truck": np.random.randint(1, 5, 5),
+    "Bicycle": np.random.randint(2, 14, 5),
+    "Pedestrian": np.random.randint(3, 15, 5),
+    "Auto": np.random.randint(5, 20, 5),
+    "Others": np.random.randint(2, 10, 5)
+}
+
+df_modes = pd.DataFrame({
+    "Forecasted Time": forecast_times,
+    "Duration": ["5 min", "15 min", "30 min", "1 hour", "2 hour"],
+    **forecast_counts
+})
+
+# ===== Add Present (Now) Row =====
+latest_row = traffic_df.iloc[-1]
+end_time = latest_row["Time"]
+start_time = end_time - pd.Timedelta(minutes=5)
+current_time = f"{start_time.strftime('%I:%M %p')} - {end_time.strftime('%I:%M %p')}"
+
+vehicle_types = list(pcu_factors.keys())
+
+present_values = df_modes.iloc[0][vehicle_types]
+present_values = (present_values * np.random.uniform(0.85, 1.15)).astype(int)
+
+now_row = {
+    "Forecasted Time": f"{current_time}<br><b>Present Count</b>",
+    "Duration": "Last <br> 5 min",
+    **present_values.to_dict()
+}
+now_row["Total PCU"] = int(sum(now_row[vt] * pcu_factors[vt] for vt in vehicle_types) * 20)
+los_value = get_los(now_row["Total PCU"])
+now_row["Predicted LOS"] = f"{los_value}<br><b>Present LOS</b>"
+
+# Compute PCU and LOS for forecasts
+df_modes["Total PCU"] = (sum(df_modes[vt] * pcu_factors[vt] for vt in vehicle_types) * 20).astype(int)
 df_modes["Predicted LOS"] = df_modes["Total PCU"].apply(get_los)
 
-st.markdown("##  🕒 Short Term Prediction of all Modes (Auto-Updated every 5 minutes)")
-st.dataframe(df_modes.set_index("Forecasted Time")[[
+# Insert Now row at the top
+df_modes = pd.concat([pd.DataFrame([now_row]), df_modes], ignore_index=True)
+
+# === LOS Colour Scale ===
+los_colors = {
+    "A": "#d4edda",  # Green
+    "B": "#cce5ff",  # Blue
+    "C": "#fff3cd",  # Yellow
+    "D": "#ffeeba",  # Orange
+    "E": "#f8d7da",  # Pink
+    "F": "#f5c6cb"   # Red
+}
+
+def highlight_los(val):
+    color = los_colors.get(val, "#ffffff")
+    return f'background-color: {color}'
+
+def highlight_now_row(row):
+    forecast_time = str(row["Forecasted Time"])
+    if "Present Count" in forecast_time:
+        return ['background-color: #e0f7fa'] * len(row)
+    else:
+        return [''] * len(row)
+
+columns_to_show = [
     "Duration", "Car", "2 Wheeler", "Bus", "Truck",
     "Bicycle", "Pedestrian", "Auto", "Others", "Total PCU", "Predicted LOS"
-]])
+]
+styled_df = df_modes[["Forecasted Time"] + columns_to_show].style\
+    .applymap(highlight_los, subset=["Predicted LOS"])\
+    .apply(highlight_now_row, axis=1)\
+    .set_properties(**{'text-align': 'center'})\
+    .set_table_styles(
+        [{'selector': 'td, th', 'props': [('border', '1px solid #ccc'), ('padding', '4px')]}],
+        overwrite=False
+    )
+
+st.markdown("##  🕒 Short Term Prediction of all Modes (Auto-Updated every 5 minutes)")
+columns_to_show = [
+    "Duration", "Car", "2 Wheeler", "Bus", "Truck",
+    "Bicycle", "Pedestrian", "Auto", "Others", "Total PCU", "Predicted LOS"
+]
+st.markdown(
+    """
+    <style>
+        thead th { text-align: center !important; }
+        td, th {
+            border: 1px solid #ccc !important;
+            padding: 4px !important;
+            text-align: center !important;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(styled_df.to_html(escape=False), unsafe_allow_html=True)
+
+# === LOS Legend ===
+los_legend_html = "<b>LOS Colour Scale:</b> - " + ' '.join([
+    f'<span style="background-color:{color}; padding:3px 8px; margin-right:5px; border-radius:4px;">LOS {k}</span>'
+    for k, color in los_colors.items()
+])
+st.markdown(f"<div style='margin-top: 10px;'>{los_legend_html}</div>", unsafe_allow_html=True)
 
 # ========== SUMMARY ==========
+st.markdown("---")
 st.markdown("## 🔍 Traffic Summary")
 col1, col2, col3 = st.columns(3)
 
@@ -168,28 +255,24 @@ fig_heat = px.imshow(heatmap_df, aspect='auto', color_continuous_scale='Viridis'
 st.plotly_chart(fig_heat, use_container_width=True)
 
 # ========== INTERACTIVE MAP ==========
-with st.container():
-    st.markdown("### 🗺️ Interactive Traffic Map (Newtown)", help="Zoom or click markers for congestion details")
-    m = folium.Map(location=[22.5818, 88.4819], zoom_start=14)
-    
-    congestion_data = [
-        (22.5818, 88.4819, "Heavy", "#FF0000"),
-        (22.5850, 88.4880, "Medium", "#FFA500"),
-        (22.5790, 88.4750, "Low", "#00FF00")
-    ]
-    
-    for lat, lon, severity, color in congestion_data:
-        folium.CircleMarker(
-            location=[lat, lon],
-            radius=20,
-            popup=f"{severity} Congestion",
-            color=color,
-            fill=True,
-            fill_opacity=0.6
-        ).add_to(m)
-    
-    # Fix the height here if needed
-    st_folium(m, width=700, height=400)
+st.markdown("---")
+st.markdown("### 🗺️ Interactive Traffic Map (Newtown)")
+m = folium.Map(location=[22.5818, 88.4819], zoom_start=14)
+congestion_data = [
+    (22.5818, 88.4819, "Heavy", "#FF0000"),
+    (22.5850, 88.4880, "Medium", "#FFA500"),
+    (22.5790, 88.4750, "Low", "#00FF00")
+]
+for lat, lon, severity, color in congestion_data:
+    folium.CircleMarker(
+        location=[lat, lon],
+        radius=20,
+        popup=f"{severity} Congestion",
+        color=color,
+        fill=True,
+        fill_opacity=0.6
+    ).add_to(m)
+st_folium(m, width=700, height=400)
 
 # ========== WEATHER CONDITIONS ==========
 st.markdown("---")
