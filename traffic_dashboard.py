@@ -307,7 +307,7 @@ for lat, lon, severity, color in congestion_data:
         fill=True,
         fill_opacity=0.6
     ).add_to(m)
-st_folium(m, width=700, height=400)
+st_folium(m, width=None, height=400, returned_objects=[], key="map_render")
 
 # ========== WEATHER CONDITIONS ==========
 st.markdown("---")
