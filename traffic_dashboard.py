@@ -217,6 +217,43 @@ los_legend_html = "<b>LOS Colour Scale:</b> - " + ' '.join([
 ])
 st.markdown(f"<div style='margin-top: 10px;'>{los_legend_html}</div>", unsafe_allow_html=True)
 
+# ========== ACTIONABLE INSIGHTS ==========
+st.markdown("---")
+st.markdown("## 📊 Recommended Actions")
+
+# Simulate real-time LOS (replace with your model's output)
+predicted_los = "E"
+
+if predicted_los in ["E", "F"]:
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("### ✅ Dynamic Signal Control")
+        st.markdown("- Adjust timings on **Street 144** and **Street 240** junction signal")
+        st.markdown("- Mode: `Auto` or `Manual Override`")
+
+        st.markdown("### ✅ Public Transport Notification")
+        st.markdown("- Alert **WBTC Fleets** (Routes: `S30`, `AC12`)")
+        st.markdown("- Delay warning sent")
+
+        st.markdown("### ✅ Public Advisory")
+        if st.button("📝 Generate Advisory"):
+            st.code(
+                "Traffic Alert: Heavy congestion near Biswa Bangla Gate from 5:30–6:15 PM. Use alternate routes via Street 280."
+            )
+
+    with col2:
+        st.markdown("### ✅ Suggested Diversions")
+        if st.button("🗺️ View Diversion Map"):
+            st.map()  # Replace with your actual map
+
+        st.markdown("### ✅ Enforcement Boost")
+        st.markdown("- Activate `ANPR` cameras")
+        st.markdown("- Priority: **Techno India Stretch**")
+
+else:
+    st.success("✅ Traffic is stable. No immediate action required.")
+
 # ========== SUMMARY ==========
 st.markdown("---")
 st.markdown("## 🔍 Traffic Summary")
