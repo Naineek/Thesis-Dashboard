@@ -307,21 +307,7 @@ for lat, lon, severity, color in congestion_data:
         fill=True,
         fill_opacity=0.6
     ).add_to(m)
-
-
-with st.container():
-    st.markdown(
-        """
-        <style>
-        .folium-map {
-            margin-bottom: -50px !important;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    st_folium(m, width=700, height=400)
-    
+st_folium(m, width=700, height=400)
 
 # ========== WEATHER CONDITIONS ==========
 st.markdown("---")
